@@ -48,7 +48,7 @@ def signup_error():
     email_error = ""
 
     if not is_username_password_valid(username):
-        username_error = "Not a valid username"
+        username_error = "Not a valid username. Must be 3 to 20 characters long and contain no spaces."
         username = username
     else:
         username = username
