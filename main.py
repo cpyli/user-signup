@@ -9,55 +9,19 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
-  
-user_signup = """
-    <style>
-        .error {{ color: red; }}
-    </style>
-
-    <h1>User Signup</h1>
-
-    <form method="POST">
-        <label>Username:
-            <input name="username" type="text" value="{username}" />
-        </label>
-        <p class="error">{username_error}</p>
-
-        <label>Password:
-            <input name="password" type="password" value="{password}" />
-        </label>
-        <p class="error">{password_error}</p>
-
-        <label>Verify Password:
-            <input name="verify_password" type="password" value="{verify_password}" />
-        </label>
-        <p class="error">{verify_password_error}</p>
-
-        <label>E-mail (Optional):
-            <input name="email" type="text" value="{email}" />
-        </label>
-        <p class="error">{email_error}</p>
-
-        <input type="submit" />
-
-    </form>
-    """
 
 @app.route("/")
 def display_user_signup():
-    return user_signup.format(username="", password="",
+    template = jinja_env.get_template("index.html")
+    return template.render(username="", password="",
     verify_password="", email="",
     username_error="", password_error="",
     verify_password_error="", email_error="")
-
-    template = jinja_env.get_template("hello_form.html")
-    return template.render()
 
 def is_username_password_valid(user_input):
     if len(user_input) > 2 and len(user_input) < 21:
         if " " not in user_input:
             return True
-    
     else:
         return False
         
@@ -90,34 +54,36 @@ def signup_error():
         username = username
 
     if not is_username_password_valid(password):   
-        password_error = "Not a valid password"
+        password_error = "Not a valid password. Must be 3 to 20 characters long and contain no spaces."
         password = ""
     else:
         password = password
 
     if not is_username_password_valid(verify_password):   
-        verify_password_error = "Not a valid password"
+        verify_password_error = "Not a valid password. Must be 3 to 20 characters long and contain no spaces."
         verify_password = ""
     else:
         verify_password = verify_password
 
-    if password != verify_password:        
-        password_error = "Passwords did not match"        
-        verify_password_error = "Passwords did not match"
-        password = ""
-        verify_password = ""
+    if not password_error and not verify_password_error:
+        if password != verify_password:        
+            password_error = "Passwords did not match. Must be 3 to 20 characters long and contain no spaces."        
+            verify_password_error = "Passwords did not match. Must be 3 to 20 characters long and contain no spaces."
+            password = ""
+            verify_password = ""
 
     if not is_email_valid(email):   
-        email_error = "Not a valid e-mail"
+        email_error = "Not a valid e-mail. Must be 3 to 20 characters long and contain no spaces."
         email = email
     else:
         email = email
 
-    if not username_error and not password_error:
+    if not username_error and not password_error and not email_error:
         username = username
         return redirect("/welcome?username={0}".format(username))
     else:
-        return user_signup.format(username=username, password="",
+        template = jinja_env.get_template("index.html")
+        return template.render(username=username, password="",
         verify_password="", email=email,
         username_error=username_error, password_error=password_error,
         verify_password_error=verify_password_error, email_error=email_error)
@@ -125,6 +91,7 @@ def signup_error():
 @app.route("/welcome")
 def welcome():
     username = request.args.get("username")
-    return "<h1>Welcome, {0}!</h1>".format(username)
+    template = jinja_env.get_template("welcome.html")
+    return template.render(username=username)
 
 app.run()
