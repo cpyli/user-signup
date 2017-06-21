@@ -1,5 +1,11 @@
 from flask import Flask, request, redirect
 import cgi
+import os
+import jinja2
+
+template_dir = os.path.join(os.path.dirname(__file__), "templates")
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader
+(template_dir), autoescape=True)
 
 app = Flask(__name__)
 app.config["DEBUG"] = True
@@ -43,6 +49,9 @@ def display_user_signup():
     verify_password="", email="",
     username_error="", password_error="",
     verify_password_error="", email_error="")
+
+    template = jinja_env.get_template("hello_form.html")
+    return template.render()
 
 def is_username_password_valid(user_input):
     if len(user_input) > 2 and len(user_input) < 21:
